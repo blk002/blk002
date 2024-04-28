@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Recompensas de Estudo 0.1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Estilos para a seção de Missões */
+        #missions {
+            display: none;
+            padding: 20px;
+        }
+
+        #missions h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        #newMissionForm {
+            margin-bottom: 20px;
+        }
+
+        #newMissionForm input,
+        #newMissionForm select {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #missionList {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .mission-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mission-item span {
+            font-weight: bold;
+        }
+
+
+
+
+
+        .delete-button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+
+
+        progress {
+        width: 100%;
+        height: 20px;
+        border-radius: 10px;
+            }
+
+        progress::-webkit-progress-value {
+            background-color: #007bff;
+            border-radius: 10px;
+        }
+
+        progress::-webkit-progress-bar {
+            background-color: #ddd;
+            border-radius: 10px;
+        }
+
+
+        #topbar {
+            width: 100%;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #topbar span {
+            font-size: 18px;
+        }
+
+        #sidebar {
+            width: 25%;
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            margin-top: 50px; /* Espaçamento do topo para evitar sobreposição */
+            height: calc(100vh - 50px); /* Altura total da viewport menos o topo */
+            overflow-y: auto;
+            flex-shrink: 0; /* Impede que o sidebar diminua ao lado do conteúdo */
+        }
+
+        #sidebar a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            margin-bottom: 10px;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        #sidebar a:hover {
+            background-color: #555;
+        }
+
+        #content {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            padding-top: 100px; /* Espaçamento do conteúdo para evitar sobreposição com o topo */
+            box-sizing: border-box;
+            justify-content: space-around; /* Alinhar colunas no centro */
+        }
+
+        .column {
+            width: 30%; /* Cada coluna ocupará 30% do espaço disponível */
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        .task-item {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .complete-button,
+        .delete-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .complete-button {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        form input,
+        form select {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #avatar {
+            width: 150px;
+            height: 150px;
+            background-color: #ccc;
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+
+        #completedMissions {
+            margin-top: 20px;
+        }
+
+        #messages {
+            list-style: none;
+            padding: 0;
+        }
+
+        #messages li {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        /* Estilos para os itens da loja virtual */
+        .store-item {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .store-item-name {
+            font-weight: bold;
+        }
+
+        .store-item-cost {
+            margin-left: auto;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        /* Estilos para a lista de missões */
+        .mission-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        .mission-item button {
+            margin-right: 10px;
+        }
+
+
+    /*conquistAS*/
+
+    .container {
+    text-align: center;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+/* Estilo das conquistas */
+.conquista {
+    display: inline-block;
+    width: 120px;
+    height: 120px;
+    background-color: #cce5ff;
+    color: #007bff;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    margin: 10px;
+    padding: 10px;
+    text-align: center;
+}
+    </style>
+</head>
+
+<body>
+    <div id="topbar">
+        <span>Sistema de Recompensas de Estudo 0.1</span>
+        <span>
+            <img src="caminho_para_sua_imagem.jpg" alt="Ícone de Pontos" style="width: 20px; height: 20px; margin-right: 5px;">
+            Pontos atuais: <strong id="lessonPoints">0</strong>
+            Nível atual: <strong id="currentLevel">1</strong>
+        </span>
+    </div>
+
+
+
+
+
+    <div id="sidebar">
+        <a href="#" onclick="showSection('tasks')">Tarefas</a>
+        <a href="#" onclick="showSection('rewards')">Recompensas</a>
+        <a href="#" onclick="showSection('achievements')">Conquistas</a>
+        <a href="#" onclick="showSection('store')">Loja Virtual</a>
+        <a href="#" onclick="showSection('challenges')">Desafios Diários</a>
+        <a href="#" onclick="showSection('missions')">Missões</a>
+        <a href="#" onclick="showSection('ranking')">Ranking</a>
+        <a href="#" onclick="showSection('random-rewards')">Recompensas Aleatórias</a>
+        <a href="#" onclick="showSection('avatar')">Personalizar Avatar</a>
+        <a href="#" onclick="showSection('community')">Comunidade</a>
+    </div>
+
+
+
+
+
+    <div id="content">
+
+
+        <div id="tasks" class="column" style="display: none;">
+            <h2>Tarefas</h2>
+            <form id="newTaskForm" onsubmit="addTask(event)">
+                <label for="taskType">Fixa ou Única:</label>
+                <select id="taskType">
+                    <option value="fixa">Fixa</option>
+                    <option value="única">Única</option>
+                </select><br>
+                <input type="text" id="taskName" placeholder="Nome da Tarefa" required><br>
+                <input type="number" id="taskPoints" placeholder="Quantidade de Pontos" required>
+                <button type="submit">Adicionar Tarefa</button>
+            </form>
+            <!-- Conteúdo das tarefas será exibido aqui -->
+        </div>
+
+
+
+        <div id="rewards" class="column" style="display: none;">
+            <h2>Recompensas</h2>
+            <form id="newRewardForm" onsubmit="addCustomReward(event)">
+                <input type="text" id="rewardName" placeholder="Nome da Recompensa" required><br>
+                <input type="number" id="rewardCost" placeholder="Custo em Pontos" required><br>
+                <button type="submit">Adicionar Recompensa</button>
+            </form>
+            <!-- Conteúdo das recompensas será exibido aqui -->
+        </div>
+
+        <div id="achievements" class="column" style="display: none;">
+            <h2>Conquistas</h2>
+            <div id="redeemedAchievements"></div>
+            <div class="column>
+            <h1>Conquistas de Tarefas</h1>
+            <div class="conquistas-container id="conquistas-container"></div> 
+                <!-- Aqui serão adicionadas as conquistas dinamicamente -->
+        </div>
+
+
+            <!-- Conteúdo das conquistas resgatadas será adicionado dinamicamente -->
+        <div id="store" class="column" style="display: none;">
+            <h2>Loja Virtual</h2>
+            <form id="newItemForm" onsubmit="addNewItem(event)">
+                <input type="text" id="itemName" placeholder="Nome do Item" required><br>
+                <input type="number" id="itemCost" placeholder="Custo em Pontos" required><br>
+                <button type="submit">Adicionar Item</button>
+            </form>
+            <!-- Lista de itens da loja -->
+            <div id="storeItems">
+                <!-- Itens adicionados dinamicamente serão exibidos aqui -->
+            </div>
+        </div>
+        
+
+        <div id="challenges" class="column" style="display: none;">
+            <h2>Desafios Diários</h2>
+            <!-- Mais desafios diários podem ser adicionados aqui -->
+            <!-- Seção de Desafios Diários -->
+            <form id="newChallengeItemForm" onsubmit="addNewChallengeItem(event)">
+                <input type="text" id="challengeItemName" placeholder="Nome do Item de Desafio" required><br>
+                <input type="number" id="challengeItemPoints" placeholder="Pontos do Item de Desafio" required><br>
+                <button type="submit">Adicionar Item de Desafio</button>
+            </form>
+            <!-- Lista de itens de desafio diário -->
+            <div id="dailyChallengeItems">
+                <!-- Itens de desafio adicionados dinamicamente serão exibidos aqui -->
+            </div>
+        </div>
+
+        <div id="missions" class="column" style="display: none;">
+            <h2>Missões</h2>
+            <form id="newMissionForm">
+            <label for="missionName">Nome da Missão:</label>
+            <input type="text" id="missionName" placeholder="Será fácil fazer isso" required>
+            <label for="missionReward">Recompensa:</label>
+            <input type="text" id="missionReward" placeholder="Pontos para ganhar" required>
+            <button type="button" onclick="addMission()">Adicionar Missão</button>
+            </form>
+            <!-- Lista de missões será exibida aqui -->
+            <div id="missionList"></div>
+    
+            <!-- Botão para resgatar missões concluídas -->
+            <button id="redeemMissionsButton" style="display: none;" onclick="redeemMissions()">Resgatar Missões Concluídas</button>
+        </div>
+
+        <div id="ranking" class="column" style="display: none;">
+            <h2>Ranking</h2>
+            <ol id="userRanking">
+               
+                <!-- Adicione mais usuários ao ranking com seus pontos -->
+            </ol>
+        </div>
+
+        <div id="random-rewards" class="column" style="display: none;">
+            <h2>Recompensas Aleatórias</h2>
+            <button onclick="claimRandomReward()">Reivindicar Recompensa Aleatória</button>
+            <!-- Adicione mais opções de recompensas aleatórias -->
+        </div>
+
+        <div id="avatar" class="column" style="display: none;">
+            <h2>Personalizar Avatar</h2>
+            <div id="avatar"></div>
+            <button onclick="customizeAvatar()">Personalizar</button>
+        </div>
+
+        <div id="community" class="column" style="display: none;">
+            <h2>Comunidade</h2>
+            <ul id="messages">
+                
+            </ul>
+            <form id="newMessageForm" onsubmit="sendMessage(event)">
+                <input type="text" id="messageText" placeholder="Digite sua mensagem..." required>
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let lessonPoints = 0;
+
+
+
+        // Atualiza o saldo de pontos e exibe o nível atual
+        function updatePoints() {
+            document.getElementById("lessonPoints").textContent = lessonPoints;
+            updateLevel();
+        }
+
+        // Atualiza o nível com base nos pontos acumulados
+        function updateLevel() {
+            const level = Math.floor(lessonPoints / 100) + 1; // Aumenta o nível a cada 100 pontos
+            document.getElementById("currentLevel").textContent = level;
+        }
+
+        // Mostra a seção especificada e oculta as outras
+function showSection(sectionId) {
+    const sections = document.querySelectorAll('.column');
+    sections.forEach(section => {
+        if (section.id === sectionId) {
+            section.style.display = 'block';
+        } else {
+            section.style.display = 'none';
+        }
+    }); // Adicionado o parêntese de fechamento para a função forEach()
+}
+
+
+
+        //TAREFAS
+
+
+        // Função para adicionar uma nova tarefa à lista
+        function addTask(event) {
+            event.preventDefault();
+            const taskName = document.getElementById("taskName").value;
+            const taskPointsInput = document.getElementById("taskPoints");
+            const taskPoints = parseInt(taskPointsInput.value);
+
+            // Verificar se o campo de pontos contém um número válido e não negativo
+            if (isNaN(taskPoints) || taskPoints < 0) {
+                alert("Por favor, insira uma quantidade válida de pontos (número positivo).");
+                taskPointsInput.focus(); // Foca no campo de pontos para correção
+                return; // Sai da função sem adicionar a tarefa
+            }
+
+            const taskType = document.getElementById("taskType").value;
+
+            const tasksContainer = document.getElementById("tasks");
+            const taskElement = document.createElement("div");
+            taskElement.classList.add("task-item");
+            taskElement.innerHTML = `
+                <h3>${taskName}</h3>
+                <p><strong>Pontos:</strong> ${taskPoints}</p>
+                <p><strong>Tipo:</strong> ${taskType}</p>
+                <button class="complete-button" onclick="completeTask(this.parentNode, ${taskPoints}, '${taskType}')">Concluído</button>
+                <button class="delete-button" onclick="deleteTask(this.parentNode)">Excluir</button>
+            `;
+            tasksContainer.appendChild(taskElement);
+
+            document.getElementById("newTaskForm").reset();
+        }
+
+       
+let tarefasCompletas = 0; // Variável para contar o número de tarefas concluídas
+
+function concluirTarefa() {
+    tarefasCompletas++;
+    console.log(`Tarefas completas: ${tarefasCompletas}`);
+    verificarConquistas(); // Verifica se alguma conquista foi alcançada
+}
+
+// Marca a tarefa como concluída e atualiza os pontos
+function completeTask(taskElement, points, taskType) {
+    lessonPoints += points; // Adiciona os pontos ao saldo
+    updatePoints(); // Atualiza a exibição do saldo
+    checkMissionsCompletion('tasks', 1); // Verifica conclusão da missão relacionada às tarefas
+    
+    if (taskType === 'única') {
+        taskElement.remove(); // Remove a tarefa do DOM se for única
+    }
+
+    concluirTarefa(); // Chama a função concluirTarefa() ao concluir a tarefa
+}
+
+
+        
+
+
+
+        // Exclui a tarefa do DOM
+        function deleteTask(taskElement) {
+            taskElement.remove(); // Exclui a tarefa do DOM
+        }
+
+
+        //RECOMPENSAS
+
+
+
+
+
+       // Função para adicionar uma nova recompensa personalizada à lista
+        function addCustomReward(event) {
+            event.preventDefault();
+            const name = document.getElementById("rewardName").value;
+            const rewardCostInput = document.getElementById("rewardCost");
+            const rewardCost = parseInt(rewardCostInput.value);
+
+            if (isNaN(rewardCost) || rewardCost < 0) {
+                alert("Por favor, insira um custo válido em pontos (número positivo) para a recompensa.");
+                rewardCostInput.focus();
+                return;
+            }
+
+            const rewardsContainer = document.getElementById("rewards");
+            const rewardElement = document.createElement("div");
+            rewardElement.classList.add("reward-item");
+            rewardElement.innerHTML = `
+                <h3>${name}</h3>
+                <p><strong>Custo:</strong> ${rewardCost} pontos</p>
+                <button class="redeem-button" onclick="redeemReward(${rewardCost}, '${name}')">Resgatar</button>
+            `;
+            rewardsContainer.appendChild(rewardElement);
+
+            document.getElementById("newRewardForm").reset();
+        }
+
+        // Função para resgatar uma missão
+        function completeMission(index) {
+            const completedMission = missions.splice(index, 1)[0];
+            alert(`Missão "${completedMission.name}" resgatada com sucesso! Recompensa: ${completedMission.reward}`);
+            // Aqui, você pode adicionar lógica adicional, como atualizar o saldo de moedas, se necessário
+            displayMissions(); // Atualiza a exibição da lista de missões
+        }
+
+
+
+
+       // Resgata a recompensa se houver pontos suficientes
+        function redeemReward(cost, rewardName) {
+            const currentDate = new Date().toLocaleString('pt-BR');
+            if (lessonPoints >= cost) {
+                lessonPoints -= cost;
+                updatePoints();
+                // Remover a recompensa da lista
+                const rewardsContainer = document.getElementById("rewards");
+                const rewardItems = rewardsContainer.querySelectorAll(".reward-item");
+                rewardItems.forEach(item => {
+                    if (item.querySelector("h3").textContent === rewardName) {
+                        item.remove(); // Remove o elemento HTML da lista visual
+                    }
+                });
+                showDialog(`Recompensa "${rewardName}" resgatada com sucesso!`);
+                checkMissionsCompletion('rewards', 1);
+            } else {
+                showDialog("Pontos insuficientes para resgatar esta recompensa.");
+            }
+        }
+
+
+
+
+        //CONQUISTAS
+        
+       const conquistas = [
+    { nome: '10 Tarefas', quantidade: 10, imagem: 'badge_10_tarefas.png' },
+    { nome: '15 Tarefas', quantidade: 15, imagem: 'badge_15_tarefas.png' },
+    { nome: '50 Tarefas', quantidade: 50, imagem: 'badge_50_tarefas.png' },
+    { nome: '100 Tarefas', quantidade: 100, imagem: 'badge_100_tarefas.png' },
+    { nome: '1000 Tarefas', quantidade: 1000, imagem: 'badge_1000_tarefas.png' },
+    { nome: '2000 Tarefas', quantidade: 2000, imagem: 'badge_2000_tarefas.png' },
+    { nome: '5000 Tarefas', quantidade: 5000, imagem: 'badge_5000_tarefas.png' },
+    { nome: '10000 Tarefas', quantidade: 10000, imagem: 'badge_10000_tarefas.png' },
+    { nome: '15000 Tarefas', quantidade: 15000, imagem: 'badge_15000_tarefas.png' },
+    { nome: '20000 Tarefas', quantidade: 20000, imagem: 'badge_20000_tarefas.png' },
+    { nome: '30000 Tarefas', quantidade: 30000, imagem: 'badge_30000_tarefas.png' },
+    { nome: '40000 Tarefas', quantidade: 40000, imagem: 'badge_40000_tarefas.png' },
+    { nome: '50000 Tarefas', quantidade: 50000, imagem: 'badge_50000_tarefas.png' },
+    { nome: '100000 Tarefas', quantidade: 100000, imagem: 'badge_100000_tarefas.png' },
+    { nome: '500000 Tarefas', quantidade: 500000, imagem: 'badge_500000_tarefas.png' },
+    { nome: '1000000 Tarefas', quantidade: 1000000, imagem: 'badge_1000000_tarefas.png' }
+];
+
+
+
+
+
+function adicionarConquistas() {
+    const container = document.getElementById('conquistas-container');
+    conquistas.forEach(conquista => {
+        const divConquista = document.createElement('div');
+        divConquista.classList.add('conquista');
+        divConquista.textContent = conquista.nome;
+
+        const imagem = document.createElement('img');
+        imagem.src = `imagens/${conquista.imagem}`;
+        imagem.alt = conquista.nome;
+        imagem.style.display = 'none'; // Inicialmente oculta
+
+        divConquista.appendChild(imagem);
+        container.appendChild(divConquista);
+    });
+}
+
+function verificarConquistas() {
+    conquistas.forEach(conquista => {
+        const divConquista = Array.from(document.querySelectorAll('.conquista')).find(div => div.textContent.includes(conquista.nome));
+        if (divConquista && tarefasCompletas >= conquista.quantidade) {
+            const imagem = divConquista.querySelector('img');
+            if (imagem) {
+                imagem.style.display = 'block'; // Exibe a imagem da conquista alcançada
+            }
+        }
+    });
+}
+
+
+function concluirTarefa() {
+    tarefasCompletas++;
+    console.log(`Tarefas completas: ${tarefasCompletas}`);
+    verificarConquistas(); // Verifica se alguma conquista foi alcançada
+}
+
+// Chamada para adicionar as conquistas ao carregar a página
+adicionarConquistas();
+
+
+
+        //LOJA VIRTUAL
+
+
+
+       
+        // Função para adicionar um novo item à lista da loja virtual
+        function addNewItem(event) {
+            event.preventDefault();
+            const itemName = document.getElementById("itemName").value;
+            const itemCostInput = document.getElementById("itemCost");
+            const itemCost = parseInt(itemCostInput.value);
+
+            if (isNaN(itemCost) || itemCost < 0) {
+                alert("Por favor, insira um custo válido em pontos (número positivo) para o item.");
+                itemCostInput.focus();
+                return;
+            }
+
+            const storeItemsContainer = document.getElementById("storeItems");
+            const newItemElement = document.createElement("div");
+            newItemElement.classList.add("store-item");
+            newItemElement.innerHTML = `
+                <span class="store-item-name">${itemName}</span> 
+                <span class="store-item-cost">${itemCost} pontos</span> <br>
+                <button class="buy-button" onclick="redeemItem('${itemName}', ${itemCost})">Comprar</button>
+                <button class="delete-button" onclick="deleteStoreItem(this.parentNode)">Excluir</button>
+            `;
+            storeItemsContainer.appendChild(newItemElement);
+
+            document.getElementById("newItemForm").reset();
+        }
+
+        // Função para excluir um item da loja
+        function deleteStoreItem(itemElement) {
+            itemElement.remove(); // Remove o item da loja
+        }
+
+        // Função para resgatar um item da loja virtual se houver pontos suficientes
+        function redeemItem(itemName, itemCost) {
+            if (lessonPoints >= itemCost) {
+            lessonPoints -= itemCost;
+            updatePoints();
+            showDialog(`Item "${itemName}" resgatado com sucesso!`);
+            } else {
+            showDialog("Pontos insuficientes para resgatar este item.");
+            }
+        }
+
+
+        //Desafio Diário
+
+
+        
+function addNewChallengeItem(event) {
+    event.preventDefault();
+    const challengeItemName = document.getElementById("challengeItemName").value;
+    const challengeItemPointsInput = document.getElementById("challengeItemPoints");
+    const challengeItemPoints = parseInt(challengeItemPointsInput.value);
+
+    if (isNaN(challengeItemPoints) || challengeItemPoints < 0) {
+        alert("Por favor, insira um valor válido em pontos para o desafio.");
+        challengeItemPointsInput.focus();
+        return;
+    }
+
+    const dailyChallengeItemsContainer = document.getElementById("dailyChallengeItems");
+    const newChallengeItemElement = document.createElement("div");
+    newChallengeItemElement.classList.add("challenge-item");
+    newChallengeItemElement.innerHTML = `
+        <span class="challenge-item-name">${challengeItemName}</span> <br>
+        <span class="challenge-item-points">(${challengeItemPoints} pontos)</span>
+        <button class="claim-button" onclick="claimChallenge('${challengeItemName}', ${challengeItemPoints}, this)">Concluir Desafio</button>
+        <button class="delete-button" onclick="deleteChallenge(this.parentNode)">Excluir</button>
+    `;
+    dailyChallengeItemsContainer.appendChild(newChallengeItemElement);
+
+    document.getElementById("newChallengeItemForm").reset();
+}
+
+function claimChallenge(challengeItemName, challengeItemPoints, element) {
+    lessonPoints += challengeItemPoints; // Adicionar pontos ao saldo
+    updatePoints(); // Atualizar a exibição do saldo de pontos
+    showDialog(`Mais ${challengeItemName} pontos na conta!`);
+
+    // Remover o desafio da lista após ser concluído
+    const challengeItemElement = element.parentNode;
+    challengeItemElement.remove();
+}
+
+function deleteChallenge(challengeItemElement) {
+    challengeItemElement.remove(); // Remover o elemento do desafio da lista
+}
+
+function showDialog(message) {
+    alert(message);
+}
+
+// Função para atualizar a exibição do saldo de pontos
+function updatePoints() {
+    const pointsElement = document.getElementById("lessonPoints");
+    pointsElement.textContent = lessonPoints.toString();
+}
+
+        
+        
+
+        //Missões
+        // Função para atualizar a barra de progresso da missão
+        function updateMissionProgress(missionName, progress) {
+            const progressBar = document.getElementById(`${missionName}Progress`);
+            if (progressBar) {
+                progressBar.value = progress;
+            }
+        }
+
+
+
+
+
+
+        // Reivindica uma recompensa aleatória da lista
+        function claimRandomReward() {
+            const randomRewards = ["Recompensa 1", "Recompensa 2", "Recompensa 3"]; // Lista de recompensas aleatórias
+            const randomIndex = Math.floor(Math.random() * randomRewards.length);
+            const randomReward = randomRewards[randomIndex];
+            showDialog(`Recompensa Aleatória: ${randomReward}`);
+        }
+
+        // Personaliza o avatar (função a ser implementada)
+        function customizeAvatar() {
+            alert("Personalizar avatar ainda não implementado.");
+        }
+
+        // Envia uma mensagem para a comunidade
+        function sendMessage(event) {
+            event.preventDefault();
+            const messageText = document.getElementById("messageText").value;
+
+            const messagesContainer = document.getElementById("messages");
+            const messageElement = document.createElement("li");
+            messageElement.textContent = messageText;
+            messagesContainer.appendChild(messageElement);
+
+            document.getElementById("newMessageForm").reset();
+        }
+
+        // Exibe um diálogo com a mensagem fornecida
+        function showDialog(message) {
+            alert(message);
+        }
+
+        // Verifica se uma missão foi concluída e atualiza seu estado
+        function checkMissionsCompletion(missionType, amount) {
+            missions.forEach(mission => {
+                if (mission.type === missionType && !mission.completed) {
+                    mission.progress += amount;
+                    if (mission.progress >= mission.requiredCount) {
+                        mission.completed = true;
+                        displayCompletedMission(mission.name);
+                    }
+                }
+            });
+        }
+
+        // Exibe uma mensagem ao usuário sobre a conclusão da missão
+        function displayCompletedMission(missionName) {
+            const completedMissionsContainer = document.getElementById("completedMissions");
+            const missionMessage = document.createElement("p");
+            missionMessage.textContent = `Missão concluída: ${missionName}`;
+            completedMissionsContainer.appendChild(missionMessage);
+        }
+
+
+        //MISSOES
+
+
+       // Array para armazenar as missões
+        let missions = [];
+
+        // Função para adicionar uma nova missão
+        function addMission() {
+            const missionName = document.getElementById("missionName").value;
+            const missionReward = document.getElementById("missionReward").value;
+
+            // Cria um objeto de missão
+            const newMission = {
+                name: missionName,
+                reward: missionReward
+            };
+
+            missions.push(newMission); // Adiciona a nova missão ao array
+            displayMissions(); // Atualiza a exibição da lista de missões
+
+            document.getElementById("newMissionForm").reset(); // Limpa o formulário
+        }
+
+        // Função para exibir a lista de missões
+        function displayMissions() {
+            const missionListContainer = document.getElementById("missionList");
+            missionListContainer.innerHTML = ""; // Limpa o conteúdo atual da lista
+
+            // Percorre todas as missões e adiciona à lista
+            missions.forEach((mission, index) => {
+                const missionElement = document.createElement("div");
+                missionElement.classList.add("mission-item");
+                missionElement.innerHTML = `
+                    <span>${mission.name} - Recompensa: ${mission.reward}</span>
+                    <button onclick="completeMission(${index})">Resgatar Missão</button>
+                    <button onclick="deleteMission(${index})">Excluir Missão</button>
+                `;
+                missionListContainer.appendChild(missionElement);
+            });
+        }
+
+        // Função para resgatar uma missão
+        function completeMission(index) {
+            const completedMission = missions.splice(index, 1)[0];
+            alert(`Missão "${completedMission.name}" resgatada com sucesso! Recompensa: ${completedMission.reward}`);
+            displayMissions(); // Atualiza a exibição da lista de missões
+        }
+
+        // Função para excluir uma missão
+        function deleteMission(index) {
+            missions.splice(index, 1); // Remove a missão do array
+            displayMissions(); // Atualiza a exibição da lista de missões
+        }
+
+        // Exibe a lista de missões ao carregar a página
+        displayMissions();
+
+// Inicializa o sistema ao carregar a página
+window.onload = () => {
+    displayMissions(); // Exibe as missões existentes
+    updatePoints();
+    };
+
+
+    </script>
+</body>
+</html>
